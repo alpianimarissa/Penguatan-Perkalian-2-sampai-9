@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Jagoan Perkalian 2-9</title>
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Nunito:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdf4; /* Light friendly green */
+        }
+        
+        .font-kids {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .bounce-active:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .pop-effect {
+            animation: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Confetti Canvas styling */
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden relative">
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- HEADER / TOP NAV -->
+    <header class="bg-amber-100 border-b-4 border-amber-300 p-4 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <button onclick="goToScreen('home')" class="flex items-center space-x-2 text-amber-800 hover:text-amber-900 transition font-kids text-xl font-bold">
+                <span>🎒</span>
+                <span>Menu Utama</span>
+            </button>
+            <div class="flex items-center space-x-4">
+                <!-- Score & Stars -->
+                <div class="bg-amber-200 border-2 border-amber-400 px-3 py-1 rounded-full flex items-center space-x-1">
+                    <span class="text-xl">⭐</span>
+                    <span id="global-stars" class="font-bold text-amber-900 font-kids">0</span>
+                </div>
+                <!-- Avatar Indicator -->
+                <div id="avatar-indicator" class="flex items-center space-x-1 bg-white border-2 border-amber-400 rounded-full px-2 py-0.5">
+                    <span id="current-avatar-emoji" class="text-xl">🐱</span>
+                    <span id="current-avatar-name" class="text-xs font-bold text-gray-700 hidden sm:inline">Koko</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN BODY -->
+    <main class="flex-grow max-w-4xl w-full mx-auto p-4 flex flex-col justify-center">
+        
+        <!-- ================= SCREEN 1: HOME & AVATAR SELECTION ================= -->
+        <section id="screen-home" class="pop-effect flex flex-col space-y-6">
+            <div class="text-center space-y-3">
+                <h1 class="text-4xl md:text-5xl font-black text-emerald-700 font-kids tracking-wide">
+                    🎯 Jagoan Perkalian 2-9!
+                </h1>
+                <p class="text-lg text-emerald-900 max-w-xl mx-auto">
+                    Kuasai semua perkalian dari angka terkecil hingga angka terbesar dengan visual seru, trik jari, dan tanpa pusing!
+                </p>
+            </div>
+
+            <!-- Avatar Selector Card -->
+            <div class="bg-white rounded-3xl p-6 shadow-xl border-4 border-emerald-200">
+                <h2 class="text-xl font-bold text-emerald-800 mb-4 text-center font-kids">1. Pilih Karakter Teman Belajarmu:</h2>
+                <div class="grid grid-cols-4 gap-3 max-w-md mx-auto">
+                    <button onclick="selectAvatar('🐱', 'Koko')" class="avatar-btn p-3 bg-emerald-50 rounded-2xl border-4 border-emerald-400 flex flex-col items-center transition hover:scale-105" id="btn-avatar-koko">
+                        <span class="text-4xl">🐱</span>
+                        <span class="text-xs font-bold mt-1 text-emerald-900">Koko</span>
+                    </button>
+                    <button onclick="selectAvatar('🐰', 'Bunny')" class="avatar-btn p-3 bg-gray-50 rounded-2xl border-4 border-transparent flex flex-col items-center transition hover:scale-105" id="btn-avatar-bunny">
+                        <span class="text-4xl">🐰</span>
+                        <span class="text-xs font-bold mt-1 text-gray-600">Bunny</span>
+                    </button>
+                    <button onclick="selectAvatar('🦖', 'Dino')" class="avatar-btn p-3 bg-gray-50 rounded-2xl border-4 border-transparent flex flex-col items-center transition hover:scale-105" id="btn-avatar-dino">
+                        <span class="text-4xl">🦖</span>
+                        <span class="text-xs font-bold mt-1 text-gray-600">Dino</span>
+                    </button>
+                    <button onclick="selectAvatar('🚀', 'Roki')" class="avatar-btn p-3 bg-gray-50 rounded-2xl border-4 border-transparent flex flex-col items-center transition hover:scale-105" id="btn-avatar-roki">
+                        <span class="text-4xl">🚀</span>
+                        <span class="text-xs font-bold mt-1 text-gray-600">Roki</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Menu Options Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Mode 1: Belajar Visual & Trik -->
+                <div class="bg-white rounded-3xl p-6 shadow-xl border-4 border-sky-200 flex flex-col justify-between hover:border-sky-400 transition-all duration-300">
+                    <div class="space-y-3">
+                        <div class="w-12 h-12 rounded-2xl bg-sky-100 flex items-center justify-center text-2xl">💡</div>
+                        <h3 class="text-2xl font-black text-sky-800 font-kids">Eksplorasi & Trik Visual</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            Belajar menggunakan kotak visual donat, pembagian kelompok angka, dan trik unik super cepat dari perkalian 2 sampai 9.
+                        </p>
+                    </div>
+                    <button onclick="goToScreen('visual')" class="mt-6 w-full py-4 bg-sky-500 hover:bg-sky-600 text-white font-black text-lg rounded-2xl border-b-4 border-sky-700 shadow-md bounce-active transition duration-150">
+                        Mulai Eksplorasi 🔍
+                    </button>
+                </div>
+
+                <!-- Mode 2: Kuis Tantangan Berhadiah -->
+                <div class="bg-white rounded-3xl p-6 shadow-xl border-4 border-purple-200 flex flex-col justify-between hover:border-purple-400 transition-all duration-300">
+                    <div class="space-y-3">
+                        <div class="w-12 h-12 rounded-2xl bg-purple-100 flex items-center justify-center text-2xl">🏆</div>
+                        <h3 class="text-2xl font-black text-purple-800 font-kids">Kuis Tantangan Seru</h3>
+                        <p class="text-gray-600 text-sm leading-relaxed">
+                            Uji kemampuanmu! Jawab pertanyaan acak sesuai tingkat kesulitan pilihanmu (Mudah 2-5 atau Tantangan 6-9) untuk mengoleksi stiker.
+                        </p>
+                    </div>
+                    <button onclick="goToScreen('quiz-setup')" class="mt-6 w-full py-4 bg-purple-500 hover:bg-purple-600 text-white font-black text-lg rounded-2xl border-b-4 border-purple-700 shadow-md bounce-active transition duration-150">
+                        Ayo Main Kuis! 🕹️
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stickers Progress -->
+            <div class="bg-white rounded-3xl p-6 shadow-md border-2 border-emerald-100">
+                <h3 class="text-lg font-bold text-emerald-800 font-kids mb-3 flex items-center gap-2">
+                    <span>🏆</span> Album Stiker Prestasimu:
+                </h3>
+                <div class="grid grid-cols-4 sm:grid-cols-8 gap-3" id="sticker-album">
+                    <!-- Dynamic Stickers go here -->
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SCREEN 2: VISUAL EXPLORER ================= -->
+        <section id="screen-visual" class="pop-effect hidden flex flex-col space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-3xl font-black text-sky-800 font-kids">🔍 Eksplorasi Visual Interaktif</h2>
+                    <p class="text-gray-600">Pilih angka perkalian di bawah dan temukan trik asyiknya!</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="goToScreen('home')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-bold transition">Kembali</button>
+                </div>
+            </div>
+
+            <!-- Controls and Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left Control Panel -->
+                <div class="lg:col-span-5 bg-white rounded-3xl p-6 shadow-xl border-4 border-sky-100 space-y-6">
+                    <div>
+                        <label class="block text-sm font-black text-gray-500 uppercase tracking-wider mb-2">Pilih Perkalian Angka:</label>
+                        <div class="grid grid-cols-4 gap-2">
+                            <!-- Expanded to 2-9 -->
+                            <button onclick="setVisualLeft(2)" id="vis-l-2" class="vis-num-btn py-3 rounded-xl font-black text-xl border-2 transition">2</button>
+                            <button onclick="setVisualLeft(3)" id="vis-l-3" class="vis-num-btn py-3 rounded-xl font-black text-xl border-2 transition">3</button>
+                            <button onclick="setVisualLeft(4)" id="vis-l-4" class="vis-num-btn py-3 rounded-xl font-black text-xl border-2 transition">4</button>
+                            <button onclick="setVisualLeft(5)" id="vis-l-5" class="vis-num-btn py-3 rounded-xl font-black text-xl border-2 transition">5</button>
+                            <button onclick="setVisualLeft(6)" id="vis-l-6" class="vis-num-btn py-3 rounded-xl font-black text-xl border-2 transition">6</button>
+                            <button onclick="setVisualLeft(7)" id="vis-l-7" class="vis-num-btn py-3 rounded-xl font-black text-xl border-2 transition">7</button>
+                            <button onclick="setVisualLeft(8)" id="vis-l-8" class="vis-num-btn py-3 rounded-xl font-black text-xl border-2 transition">8</button>
+                            <button onclick="setVisualLeft(9)" id="vis-l-9" class="vis-num-btn py-3 rounded-xl font-black text-xl border-2 transition">9</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-sm font-black text-gray-500 uppercase tracking-wider">Angka Kanan (Pengali):</label>
+                            <span class="bg-sky-100 text-sky-800 font-bold px-2 py-0.5 rounded text-sm" id="visual-right-val">5</span>
+                        </div>
+                        <input type="range" min="1" max="10" value="5" class="w-full accent-sky-500 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="visual-right-slider" oninput="updateVisualRight(this.value)">
+                        <div class="flex justify-between text-xs font-bold text-gray-400 mt-1">
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                        </div>
+                    </div>
+
+                    <!-- Big equation -->
+                    <div class="bg-sky-50 rounded-2xl p-4 text-center border-2 border-sky-200">
+                        <div class="text-5xl font-black text-sky-900 font-kids flex justify-center items-center gap-2">
+                            <span id="eq-left" class="bg-white px-3 py-1 rounded-xl shadow-sm text-sky-500">6</span>
+                            <span>×</span>
+                            <span id="eq-right" class="bg-white px-3 py-1 rounded-xl shadow-sm text-amber-500">5</span>
+                            <span>=</span>
+                            <span id="eq-result" class="text-emerald-600 bg-emerald-50 px-4 py-1 rounded-xl border-2 border-emerald-300">30</span>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Trick Box -->
+                    <div id="trick-box" class="bg-amber-50 rounded-2xl p-4 border-2 border-amber-300 space-y-2">
+                        <!-- Content loaded dynamically based on left number -->
+                    </div>
+                </div>
+
+                <!-- Right Visual Grid Representation -->
+                <div class="lg:col-span-7 bg-white rounded-3xl p-6 shadow-xl border-4 border-sky-100 flex flex-col justify-between">
+                    <div class="text-center mb-4">
+                        <h4 class="font-bold text-gray-700 font-kids">Lihat Pola Donat & Kue:</h4>
+                        <p class="text-xs text-gray-400 font-semibold">Sentuh donat untuk melihat bagaimana jumlahnya terbentuk!</p>
+                    </div>
+
+                    <!-- Dynamic donut grid -->
+                    <div class="flex justify-center items-center flex-grow py-4">
+                        <div id="visual-grid-container" class="grid gap-1.5 p-4 bg-amber-50 rounded-2xl border-2 border-dashed border-amber-200 max-w-full overflow-auto">
+                            <!-- Grid dots injected here -->
+                        </div>
+                    </div>
+
+                    <!-- Visual Breakdown Helper -->
+                    <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-3 text-center" id="visual-breakdown">
+                        <!-- Breakdown text for easier calculation -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SCREEN 3: QUIZ SETUP ================= -->
+        <section id="screen-quiz-setup" class="pop-effect hidden flex flex-col space-y-6 max-w-md mx-auto">
+            <div class="text-center space-y-2">
+                <h2 class="text-3xl font-black text-purple-800 font-kids">🚀 Siapkan Kuis Jagoanmu</h2>
+                <p class="text-gray-600">Mau menguji perkalian tingkat dasar atau tingkat mahir?</p>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 shadow-xl border-4 border-purple-200 space-y-6">
+                <!-- Selection Target (Refactored to support 2-5 and 6-9 better) -->
+                <div class="space-y-3">
+                    <label class="block text-sm font-black text-gray-500 uppercase tracking-wider text-center">Tingkat Perkalian:</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="selectQuizTarget('easy')" id="qtarget-easy" class="qtarget-btn py-4 rounded-2xl border-4 font-black text-lg transition flex flex-col items-center">
+                            <span class="text-2xl">🌱</span>
+                            <span class="mt-1 text-sm">Dasar (2-5)</span>
+                        </button>
+                        <button onclick="selectQuizTarget('hard')" id="qtarget-hard" class="qtarget-btn py-4 rounded-2xl border-4 font-black text-lg transition flex flex-col items-center">
+                            <span class="text-2xl">🦁</span>
+                            <span class="mt-1 text-sm">Tantangan (6-9)</span>
+                        </button>
+                        <button onclick="selectQuizTarget('all')" id="qtarget-all" class="qtarget-btn py-4 rounded-2xl border-4 font-black text-lg transition flex flex-col items-center col-span-2">
+                            <span class="text-2xl">👑</span>
+                            <span class="mt-1 text-sm">Campuran Semua (2-9)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sub-Fokus Target selection -->
+                <div class="space-y-2" id="sub-focus-container">
+                    <label class="block text-xs font-black text-gray-400 uppercase tracking-wider text-center">Fokus Angka Spesifik (Opsional):</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="selectSubFocus('2')" id="qsub-2" class="qsub-btn py-2 text-sm font-bold bg-gray-50 border border-gray-200 rounded-xl transition">×2</button>
+                        <button onclick="selectSubFocus('3')" id="qsub-3" class="qsub-btn py-2 text-sm font-bold bg-gray-50 border border-gray-200 rounded-xl transition">×3</button>
+                        <button onclick="selectSubFocus('4')" id="qsub-4" class="qsub-btn py-2 text-sm font-bold bg-gray-50 border border-gray-200 rounded-xl transition">×4</button>
+                        <button onclick="selectSubFocus('5')" id="qsub-5" class="qsub-btn py-2 text-sm font-bold bg-gray-50 border border-gray-200 rounded-xl transition">×5</button>
+                        <button onclick="selectSubFocus('6')" id="qsub-6" class="qsub-btn py-2 text-sm font-bold bg-gray-50 border border-gray-200 rounded-xl transition">×6</button>
+                        <button onclick="selectSubFocus('7')" id="qsub-7" class="qsub-btn py-2 text-sm font-bold bg-gray-50 border border-gray-200 rounded-xl transition">×7</button>
+                        <button onclick="selectSubFocus('8')" id="qsub-8" class="qsub-btn py-2 text-sm font-bold bg-gray-50 border border-gray-200 rounded-xl transition">×8</button>
+                        <button onclick="selectSubFocus('9')" id="qsub-9" class="qsub-btn py-2 text-sm font-bold bg-gray-50 border border-gray-200 rounded-xl transition">×9</button>
+                    </div>
+                </div>
+
+                <!-- Quiz Mode selection -->
+                <div class="space-y-3">
+                    <label class="block text-sm font-black text-gray-500 uppercase tracking-wider text-center">Pilih Mode Bermain:</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="selectQuizMode('relaxed')" id="qmode-relaxed" class="qmode-btn py-3 rounded-2xl border-2 font-bold transition flex flex-col items-center">
+                            <span class="text-xl">🧘</span>
+                            <span class="text-sm mt-0.5 font-black">Santai (Tanpa Waktu)</span>
+                        </button>
+                        <button onclick="selectQuizMode('timed')" id="qmode-timed" class="qmode-btn py-3 rounded-2xl border-2 font-bold transition flex flex-col items-center">
+                            <span class="text-xl">⏱️</span>
+                            <span class="text-sm mt-0.5 font-black">Tantangan Waktu</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button onclick="goToScreen('home')" class="w-1/3 py-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-2xl transition">Kembali</button>
+                    <button onclick="startQuiz()" class="w-2/3 py-4 bg-purple-500 hover:bg-purple-600 text-white font-black text-lg rounded-2xl border-b-4 border-purple-700 shadow-md bounce-active transition duration-150">
+                        Mulai Kuis! 🎮
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SCREEN 4: THE ACTIVE QUIZ ================= -->
+        <section id="screen-quiz-play" class="pop-effect hidden flex flex-col space-y-6">
+            <!-- Quiz Info Bar -->
+            <div class="bg-purple-50 border-2 border-purple-100 rounded-2xl p-4 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center font-bold text-purple-700" id="quiz-question-index">1/10</div>
+                    <div>
+                        <div class="text-xs text-purple-500 font-bold">Kategori Kuis</div>
+                        <div class="text-sm font-black text-purple-800" id="quiz-play-title">Perkalian Campur</div>
+                    </div>
+                </div>
+                <!-- Timer (only shows in timed mode) -->
+                <div id="quiz-timer-container" class="flex items-center space-x-2 bg-rose-100 px-3 py-1.5 rounded-full border border-rose-300">
+                    <span class="text-rose-600 font-bold">⏱️</span>
+                    <span id="quiz-timer-text" class="font-black text-rose-700 font-kids">15s</span>
+                </div>
+                <!-- Score streak -->
+                <div class="flex items-center space-x-1.5 bg-amber-100 px-3 py-1.5 rounded-full border border-amber-300">
+                    <span class="text-amber-500 font-bold">🔥 Streak:</span>
+                    <span id="quiz-streak-text" class="font-black text-amber-800 font-kids">0</span>
+                </div>
+            </div>
+
+            <!-- Quiz Layout Grid: Left Question, Right Helper (if clicked) -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <!-- Main Question Panel -->
+                <div class="md:col-span-7 bg-white rounded-3xl p-6 shadow-xl border-4 border-purple-200 flex flex-col justify-between min-h-[350px]">
+                    <div class="text-center space-y-4 my-auto">
+                        <div id="quiz-avatar-bubble" class="inline-block bg-purple-50 text-purple-800 rounded-2xl px-4 py-2 border border-purple-200 text-sm font-bold max-w-xs relative">
+                            <!-- Avatar words inside here -->
+                            <div class="absolute w-3 h-3 bg-purple-50 border-b border-l border-purple-200 transform rotate-45 -bottom-1.5 left-1/2 -translate-x-1/2"></div>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-400">Berapa ya...</div>
+                        <!-- Question Display -->
+                        <div class="text-6xl md:text-7xl font-black text-purple-900 font-kids tracking-wider flex justify-center items-center gap-4">
+                            <span id="quiz-q-left">?</span>
+                            <span class="text-purple-400">×</span>
+                            <span id="quiz-q-right">?</span>
+                            <span class="text-purple-400">=</span>
+                            <span class="text-purple-300">?</span>
+                        </div>
+                    </div>
+
+                    <!-- Answers options -->
+                    <div class="grid grid-cols-2 gap-4 mt-6">
+                        <button onclick="submitAnswer(0)" id="choice-0" class="choice-btn py-4 px-2 bg-purple-50 hover:bg-purple-100 border-2 border-purple-300 rounded-2xl font-black text-2xl text-purple-800 transition bounce-active">?</button>
+                        <button onclick="submitAnswer(1)" id="choice-1" class="choice-btn py-4 px-2 bg-purple-50 hover:bg-purple-100 border-2 border-purple-300 rounded-2xl font-black text-2xl text-purple-800 transition bounce-active">?</button>
+                        <button onclick="submitAnswer(2)" id="choice-2" class="choice-btn py-4 px-2 bg-purple-50 hover:bg-purple-100 border-2 border-purple-300 rounded-2xl font-black text-2xl text-purple-800 transition bounce-active">?</button>
+                        <button onclick="submitAnswer(3)" id="choice-3" class="choice-btn py-4 px-2 bg-purple-50 hover:bg-purple-100 border-2 border-purple-300 rounded-2xl font-black text-2xl text-purple-800 transition bounce-active">?</button>
+                    </div>
+                </div>
+
+                <!-- Helper/Hint Box (always visible, can toggle visual grid to reduce guessing) -->
+                <div class="md:col-span-5 bg-white rounded-3xl p-6 shadow-xl border-4 border-amber-200 flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-bold text-amber-800 font-kids flex items-center gap-2">
+                            <span>💡</span> Kotak Penyelamat (Bantuan):
+                        </h3>
+                        <p class="text-xs text-gray-500">
+                            Jangan asal tebak ya! Sentuh tombol di bawah ini untuk melihat gambar bantuan atau mengingat triknya.
+                        </p>
+                        
+                        <div id="quiz-hint-area" class="border-2 border-dashed border-amber-300 rounded-2xl p-4 min-h-[160px] flex flex-col justify-center items-center text-center bg-amber-50">
+                            <!-- Visual grid helper injected here if activated -->
+                            <div id="quiz-hint-prompt" class="space-y-2">
+                                <span class="text-4xl">🤔</span>
+                                <p class="text-sm font-bold text-amber-700">Kamu bingung atau ragu?</p>
+                                <button onclick="showQuizHint()" class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold rounded-xl text-xs transition shadow-sm">
+                                    Lihat Kue Donat Bantuan 🍩
+                                </button>
+                            </div>
+                            <div id="quiz-hint-content" class="hidden w-full flex flex-col items-center space-y-2">
+                                <div id="quiz-hint-grid" class="grid gap-1 scale-90 max-h-[150px] overflow-auto p-2 bg-white rounded-xl border border-amber-200">
+                                    <!-- Dynamic miniature grid -->
+                                </div>
+                                <span class="text-xs font-bold text-amber-800" id="quiz-hint-text"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="revealSecretTrick()" class="mt-4 w-full py-2.5 bg-yellow-100 hover:bg-yellow-200 border border-yellow-300 text-yellow-800 font-bold text-xs rounded-xl transition">
+                        🔑 Lihat Trik Menghitung Cepat
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SCREEN 5: CONGRATULATIONS / CELEBRATION ================= -->
+        <section id="screen-congrats" class="pop-effect hidden flex flex-col space-y-6 max-w-xl mx-auto text-center">
+            <div class="bg-white rounded-3xl p-8 shadow-xl border-4 border-emerald-300 space-y-6">
+                <div class="space-y-2">
+                    <span class="text-6xl animate-bounce inline-block">🎉🏆🎉</span>
+                    <h2 class="text-4xl font-black text-emerald-800 font-kids" id="congrats-headline">Hebat Sekali!</h2>
+                    <p class="text-gray-600" id="congrats-sub">Kamu telah menyelesaikan tantangan kuis ini dengan cemerlang!</p>
+                </div>
+
+                <!-- Result Score Board -->
+                <div class="grid grid-cols-2 gap-4 bg-emerald-50 rounded-2xl p-4 border border-emerald-200">
+                    <div>
+                        <div class="text-xs text-emerald-600 font-bold">Jawaban Benar</div>
+                        <div class="text-3xl font-black text-emerald-800 font-kids" id="congrats-correct">8 / 10</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-emerald-600 font-bold">Bintang Diperoleh</div>
+                        <div class="text-3xl font-black text-amber-600 font-kids" id="congrats-stars">+50 ⭐</div>
+                    </div>
+                </div>
+
+                <!-- Reward Sticker Showcase -->
+                <div id="congrats-sticker-reward" class="bg-amber-50 rounded-2xl p-6 border-2 border-amber-300 space-y-3">
+                    <span class="text-xs font-black text-amber-800 uppercase tracking-wider block">🎁 Hadiah Stiker Untukmu:</span>
+                    <div class="flex justify-center">
+                        <div class="w-24 h-24 bg-white rounded-full border-4 border-amber-400 shadow-md flex items-center justify-center text-5xl relative animate-pulse" id="rewarded-sticker-emoji">
+                            🦁
+                        </div>
+                    </div>
+                    <div class="font-kids font-black text-lg text-amber-900" id="rewarded-sticker-name">Singa Pemberani</div>
+                    <p class="text-xs text-gray-500">Stiker ini sekarang tersimpan di Album Stiker Menu Utama kamu!</p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                    <button onclick="goToScreen('home')" class="w-full sm:w-1/2 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-black rounded-2xl transition">
+                        🏠 Ke Menu Utama
+                    </button>
+                    <button onclick="goToScreen('quiz-setup')" class="w-full sm:w-1/2 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-2xl border-b-4 border-emerald-700 shadow-md bounce-active transition duration-150">
+                        🔄 Main Kuis Lagi!
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-emerald-900 text-emerald-100 p-4 text-center text-xs border-t-4 border-emerald-950 mt-12">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <p>© 2026 Petualangan Jagoan Perkalian. Membantu anak belajar perkalian 2-9 secara visual dan interaktif.</p>
+            <div class="flex space-x-3">
+                <span class="opacity-75">Made with 💚 for Kids</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Audio Synth Logic & Application Scripts -->
+    <script>
+        // --- STICKER ALBUM SYSTEM ---
+        const ALL_STICKERS = [
+            { id: 'st-lion', emoji: '🦁', name: 'Singa Jagoan', unlocked: false, requirement: 'Mainkan Kuis pertama kali' },
+            { id: 'st-fox', emoji: '🦊', name: 'Rubah Cerdik', unlocked: false, requirement: 'Dapatkan skor sempurna 10/10' },
+            { id: 'st-owl', emoji: '🦉', name: 'Burung Hantu Bijak', unlocked: false, requirement: 'Gunakan tombol Bantuan Visual' },
+            { id: 'st-sprout', emoji: '🌱', name: 'Tunas Cilik', unlocked: false, requirement: 'Mainkan Kuis Dasar (2-5)' },
+            { id: 'st-dragon', emoji: '🦕', name: 'Dino Rajin', unlocked: false, requirement: 'Belajar perkalian 6-7' },
+            { id: 'st-unicorn', emoji: '🦄', name: 'Kuda Poni Ajaib', unlocked: false, requirement: 'Belajar perkalian 8-9' },
+            { id: 'st-koala', emoji: '🐨', name: 'Koala Santai', unlocked: false, requirement: 'Selesaikan kuis mode Santai' },
+            { id: 'st-cheetah', emoji: '🐆', name: 'Cheetah Kilat', unlocked: false, requirement: 'Selesaikan kuis mode Waktu' }
+        ];
+
+        // --- APP STATE ---
+        let state = {
+            currentScreen: 'home',
+            avatar: { emoji: '🐱', name: 'Koko' },
+            stars: 10, // Starting bonus
+            visual: {
+                left: 6,
+                right: 5
+            },
+            quiz: {
+                target: 'easy', // easy, hard, all
+                subFocus: 'none', // none, '2', '3', '4', '5', '6', '7', '8', '9'
+                mode: 'relaxed', // relaxed, timed
+                questions: [],
+                currentIndex: 0,
+                streak: 0,
+                correctAnswers: 0,
+                timer: 15,
+                timerInterval: null,
+                usedHintInQuiz: false,
+                currentCorrectChoice: 0
+            },
+            stickers: {} // Maps sticker ID to unlocked (boolean)
+        };
+
+        // Initialize state from local storage if available
+        function loadSaveData() {
+            const saved = localStorage.getItem('perkalian_jagoan_save');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    state.stars = parsed.stars || 10;
+                    state.stickers = parsed.stickers || {};
+                    // Mark unlocked stickers from save data
+                    ALL_STICKERS.forEach(st => {
+                        st.unlocked = !!state.stickers[st.id];
+                    });
+                } catch(e) {
+                    console.log("Error loading save data");
+                }
+            }
+        }
+
+        function saveGameData() {
+            const dataToSave = {
+                stars: state.stars,
+                stickers: state.stickers
+            };
+            localStorage.setItem('perkalian_jagoan_save', JSON.stringify(dataToSave));
+            document.getElementById('global-stars').textContent = state.stars;
+        }
+
+        // --- SOUND EFFECTS (Web Audio API Synthesizer) ---
+        let audioCtx = null;
+        function playBeep(type) {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                // Resume audio context if suspended (browser security)
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    // Happy upbeat major chord-like notes
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'wrong') {
+                    // Disappointed sliding down tone
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                    osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.3); // Slide down
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.35);
+                } else if (type === 'click') {
+                    // Short soft bubble sound
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.08);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.08);
+                } else if (type === 'congrats') {
+                    // Energetic fanfare
+                    osc.type = 'sine';
+                    const notes = [523, 659, 784, 1046];
+                    notes.forEach((freq, idx) => {
+                        const noteOsc = audioCtx.createOscillator();
+                        const noteGain = audioCtx.createGain();
+                        noteOsc.type = 'triangle';
+                        noteOsc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.1);
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(audioCtx.destination);
+                        noteGain.gain.setValueAtTime(0.15, audioCtx.currentTime + idx * 0.1);
+                        noteGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.1 + 0.4);
+                        noteOsc.start(audioCtx.currentTime + idx * 0.1);
+                        noteOsc.stop(audioCtx.currentTime + idx * 0.1 + 0.4);
+                    });
+                }
+            } catch (err) {
+                console.log("Audio not supported or permitted yet.");
+            }
+        }
+
+        // --- SCREEN ROUTER ---
+        function goToScreen(screenId) {
+            playBeep('click');
+            
+            // Hide all screens
+            document.getElementById('screen-home').classList.add('hidden');
+            document.getElementById('screen-visual').classList.add('hidden');
+            document.getElementById('screen-quiz-setup').classList.add('hidden');
+            document.getElementById('screen-quiz-play').classList.add('hidden');
+            document.getElementById('screen-congrats').classList.add('hidden');
+
+            // Show target screen
+            document.getElementById('screen-' + screenId).classList.remove('hidden');
+            state.currentScreen = screenId;
+
+            // Clear active timers when leaving quiz
+            if (screenId !== 'quiz-play' && state.quiz.timerInterval) {
+                clearInterval(state.quiz.timerInterval);
+            }
+
+            // Screen custom init
+            if (screenId === 'home') {
+                renderStickerAlbum();
+            } else if (screenId === 'visual') {
+                initVisualMode();
+            } else if (screenId === 'quiz-setup') {
+                initQuizSetup();
+            }
+        }
+
+        // --- AVATAR SELECTION ---
+        function selectAvatar(emoji, name) {
+            state.avatar = { emoji, name };
+            localStorage.setItem('perkalian_jagoan_avatar', JSON.stringify(state.avatar));
+            
+            // Update Top Header UI
+            document.getElementById('current-avatar-emoji').textContent = emoji;
+            document.getElementById('current-avatar-name').textContent = name;
+            
+            // Update visual borders
+            document.querySelectorAll('.avatar-btn').forEach(btn => {
+                btn.classList.remove('border-emerald-400', 'bg-emerald-50');
+                btn.classList.add('border-transparent', 'bg-gray-50');
+                btn.querySelector('span:last-child').classList.remove('text-emerald-900');
+                btn.querySelector('span:last-child').classList.add('text-gray-600');
+            });
+            
+            const btnId = 'btn-avatar-' + name.toLowerCase();
+            const activeBtn = document.getElementById(btnId);
+            if (activeBtn) {
+                activeBtn.classList.remove('border-transparent', 'bg-gray-50');
+                activeBtn.classList.add('border-emerald-400', 'bg-emerald-50');
+                activeBtn.querySelector('span:last-child').classList.remove('text-gray-600');
+                activeBtn.querySelector('span:last-child').classList.add('text-emerald-900');
+            }
+            playBeep('click');
+        }
+
+        // --- STICKER RENDERING ---
+        function renderStickerAlbum() {
+            const albumContainer = document.getElementById('sticker-album');
+            albumContainer.innerHTML = '';
+            
+            ALL_STICKERS.forEach(st => {
+                const wrapper = document.createElement('div');
+                wrapper.className = `flex flex-col items-center justify-center p-2 rounded-2xl border-2 transition ${
+                    st.unlocked ? 'bg-amber-50 border-amber-300' : 'bg-gray-100 border-gray-200 grayscale'
+                } relative group`;
+
+                // Hover requirement tooltip
+                wrapper.innerHTML = `
+                    <span class="text-3xl">${st.unlocked ? st.emoji : '❓'}</span>
+                    <span class="text-[10px] font-bold text-center mt-1 leading-tight text-gray-700">${st.unlocked ? st.name : 'Terkunci'}</span>
+                    <div class="absolute bottom-full mb-2 hidden group-hover:flex flex-col items-center z-50 w-36 pointer-events-none">
+                        <div class="bg-gray-800 text-white text-[10px] rounded p-2 text-center shadow-lg font-bold">
+                            Syarat: ${st.requirement}
+                        </div>
+                    </div>
+                `;
+                
+                // Add event listeners to show/hide the custom tooltip smoothly on touch
+                wrapper.addEventListener('mouseenter', () => {
+                    wrapper.querySelector('div').classList.remove('hidden');
+                });
+                wrapper.addEventListener('mouseleave', () => {
+                    wrapper.querySelector('div').classList.add('hidden');
+                });
+
+                albumContainer.appendChild(wrapper);
+            });
+        }
+
+        function unlockSticker(id) {
+            const sticker = ALL_STICKERS.find(s => s.id === id);
+            if (sticker && !sticker.unlocked) {
+                sticker.unlocked = true;
+                state.stickers[id] = true;
+                saveGameData();
+                return sticker; // Return for congrats screen use
+            }
+            return null;
+        }
+
+
+        // ================= VISUAL EXPLORER MODE LOGIC =================
+        function initVisualMode() {
+            setVisualLeft(state.visual.left);
+            updateVisualRight(state.visual.right);
+        }
+
+        function setVisualLeft(num) {
+            state.visual.left = num;
+            
+            // Highlight button
+            document.querySelectorAll('.vis-num-btn').forEach(btn => {
+                btn.className = "vis-num-btn py-3 rounded-xl font-black text-xl border-2 transition bg-white border-sky-200 text-sky-800 hover:border-sky-300";
+            });
+            const activeBtn = document.getElementById('vis-l-' + num);
+            if (activeBtn) {
+                activeBtn.className = "vis-num-btn py-3 rounded-xl font-black text-xl border-2 transition bg-sky-500 border-sky-600 text-white shadow-inner";
+            }
+
+            playBeep('click');
+            renderVisualGrid();
+            updateTrickBox();
+        }
+
+        function updateVisualRight(val) {
+            state.visual.right = parseInt(val);
+            document.getElementById('visual-right-slider').value = val;
+            document.getElementById('visual-right-val').textContent = val;
+            
+            renderVisualGrid();
+        }
+
+        function renderVisualGrid() {
+            const left = state.visual.left;
+            const right = state.visual.right;
+            const total = left * right;
+
+            // Update Equation display
+            document.getElementById('eq-left').textContent = left;
+            document.getElementById('eq-right').textContent = right;
+            document.getElementById('eq-result').textContent = total;
+
+            // Draw donut grid
+            const container = document.getElementById('visual-grid-container');
+            container.innerHTML = '';
+            
+            // Set dynamic column widths
+            container.style.gridTemplateColumns = `repeat(${right}, minmax(0, 1fr))`;
+
+            for (let r = 0; r < left; r++) {
+                for (let c = 0; c < right; c++) {
+                    const donut = document.createElement('div');
+                    
+                    // Highlight rows to show sub-groupings
+                    let donutColor = "🍩";
+                    let bgStyle = "bg-amber-100 hover:bg-amber-200";
+                    
+                    // Visual separator helper:
+                    if (left > 5) {
+                        if (r >= 5) {
+                            donutColor = "🍪"; // Brown cookie for lower part of 6-9
+                            bgStyle = "bg-orange-100 hover:bg-orange-200";
+                        }
+                    } else if (left === 4) {
+                        if (r >= 2) {
+                            donutColor = "🧁"; // Separator helper for 4 (split in half: 2 and 2)
+                            bgStyle = "bg-sky-100 hover:bg-sky-200";
+                        }
+                    }
+
+                    donut.className = `w-10 h-10 ${bgStyle} rounded-xl border border-amber-300/40 flex items-center justify-center text-xl cursor-pointer transition-transform active:scale-110`;
+                    donut.title = `Baris ${r+1}, Kolom ${c+1}`;
+                    donut.innerHTML = donutColor;
+                    container.appendChild(donut);
+                }
+            }
+
+            // Update breakdown text to explain the logic
+            const breakdownEl = document.getElementById('visual-breakdown');
+            if (left > 5) {
+                const upperPart = 5 * right;
+                const lowerPart = (left - 5) * right;
+                breakdownEl.innerHTML = `
+                    <div class="text-emerald-950 text-sm font-bold leading-normal">
+                        💡 <span class="font-black text-emerald-800">${left} × ${right}</span> itu sama dengan:
+                    </div>
+                    <div class="text-xs text-emerald-800 mt-1 font-semibold">
+                        • Kelompok atas (5 baris): <span class="font-bold">5 × ${right} = ${upperPart}</span> <br>
+                        • Kelompok bawah (${left - 5} baris): <span class="font-bold">${left - 5} × ${right} = ${lowerPart}</span> <br>
+                        • Tinggal digabung: <span class="font-bold">${upperPart} + ${lowerPart} = ${total}!</span>
+                    </div>
+                `;
+            } else if (left === 4) {
+                const double = 2 * right;
+                breakdownEl.innerHTML = `
+                    <div class="text-emerald-950 text-sm font-bold leading-normal">
+                        💡 Trik Double-Double <span class="font-black text-emerald-800">4 × ${right}</span>:
+                    </div>
+                    <div class="text-xs text-emerald-800 mt-1 font-semibold">
+                        • Lipat gundakan pertama: <span class="font-bold">2 × ${right} = ${double}</span> <br>
+                        • Lipat gandakan sekali lagi: <span class="font-bold">${double} + ${double} = ${total}!</span>
+                    </div>
+                `;
+            } else if (left === 2) {
+                breakdownEl.innerHTML = `
+                    <p class="text-sm font-bold text-emerald-800">
+                        ✨ Trik Angka Kembar: <span class="font-black">2 × ${right}</span> adalah penjumlahan kembar <span class="font-black">${right} + ${right} = ${total}!</span>
+                    </p>
+                `;
+            } else {
+                breakdownEl.innerHTML = `
+                    <p class="text-sm font-bold text-emerald-800">
+                        ✨ Perkalian <span class="font-black">${left} × ${right}</span> menghasilkan <span class="font-black">${total}</span> donat lezat!
+                    </p>
+                `;
+            }
+        }
+
+        function updateTrickBox() {
+            const left = state.visual.left;
+            const trickEl = document.getElementById('trick-box');
+
+            if (left === 2) {
+                trickEl.innerHTML = `
+                    <div class="flex items-start gap-2">
+                        <span class="text-2xl">👥</span>
+                        <div>
+                            <h5 class="font-black text-amber-900 text-sm font-kids">Trik Kembar Dua:</h5>
+                            <p class="text-xs text-amber-800 mt-1 leading-relaxed">
+                                Mengalikan dengan 2 itu sama seperti membuat angka tersebut menjadi kembar lalu dijumlahkan!
+                            </p>
+                            <p class="text-xs text-emerald-800 mt-1 bg-white px-2 py-1 rounded border border-amber-200 font-bold">
+                                Contoh 2 × 8: Tinggal hitung 8 + 8 = 16! Gampang sekali kan?
+                            </p>
+                        </div>
+                    </div>
+                `;
+            } else if (left === 3) {
+                trickEl.innerHTML = `
+                    <div class="flex items-start gap-2">
+                        <span class="text-2xl">🎵</span>
+                        <div>
+                            <h5 class="font-black text-amber-900 text-sm font-kids">Trik Irama Lompat Tiga:</h5>
+                            <p class="text-xs text-amber-800 mt-1 leading-relaxed">
+                                Lompat 3 angka setiap melangkah! Ayo bunyikan ritmenya:
+                            </p>
+                            <p class="text-xs text-amber-900 font-bold bg-white p-1 rounded mt-1 border border-amber-200 text-center">
+                                3, 6, 9, 12, 15, 18, 21, 24, 27, 30!
+                            </p>
+                        </div>
+                    </div>
+                `;
+            } else if (left === 4) {
+                trickEl.innerHTML = `
+                    <div class="flex items-start gap-2">
+                        <span class="text-2xl">🐸</span>
+                        <div>
+                            <h5 class="font-black text-amber-900 text-sm font-kids">Trik Katak Lompat Dua Kali (Double-Double):</h5>
+                            <p class="text-xs text-amber-800 mt-1 leading-relaxed">
+                                Perkalian 4 adalah perkalian 2 yang diulang dua kali.
+                            </p>
+                            <p class="text-[11px] font-bold text-amber-900 mt-1">
+                                Contoh 4 × 7: <br>
+                                Step 1 (Double 7): 7 + 7 = 14 <br>
+                                Step 2 (Double 14): 14 + 14 = 28!
+                            </p>
+                        </div>
+                    </div>
+                `;
+            } else if (left === 5) {
+                trickEl.innerHTML = `
+                    <div class="flex items-start gap-2">
+                        <span class="text-2xl">🖐️</span>
+                        <div>
+                            <h5 class="font-black text-amber-900 text-sm font-kids">Trik Jam & Jari Lima:</h5>
+                            <p class="text-xs text-amber-800 mt-1 leading-relaxed">
+                                Hasil perkalian 5 selalu berakhiran angka <b>5 atau 0</b>.
+                            </p>
+                            <p class="text-xs text-emerald-800 mt-1 bg-white px-2 py-1 rounded border border-amber-200">
+                                Pola: Jika dikalikan <b>Genap</b> hasilnya berakhiran <b>0</b> (Contoh: 5×6 = 30). <br>
+                                Jika dikalikan <b>Ganjil</b> hasilnya berakhiran <b>5</b> (Contoh: 5×7 = 35).
+                            </p>
+                        </div>
+                    </div>
+                `;
+            } else if (left === 6) {
+                trickEl.innerHTML = `
+                    <div class="flex items-start gap-2">
+                        <span class="text-2xl">🐝</span>
+                        <div>
+                            <h5 class="font-black text-amber-900 text-sm font-kids">Trik "Lebih Satu Dari Lima":</h5>
+                            <p class="text-xs text-amber-800 mt-1 leading-relaxed">
+                                6 itu adalah 5 ditambah 1. Jadi, perkalian 6 sangatlah gampang!
+                            </p>
+                            <p class="text-xs text-amber-900 font-bold bg-white p-1 rounded mt-1 border border-amber-200">
+                                6 × A = (5 × A) + A
+                                <br><span class="font-semibold text-emerald-700">Contoh 6 × 8:</span> (5 × 8) + 8 = 40 + 8 = <b>48</b>!
+                            </p>
+                        </div>
+                    </div>
+                `;
+            } else if (left === 7) {
+                trickEl.innerHTML = `
+                    <div class="flex items-start gap-2">
+                        <span class="text-2xl">⭐</span>
+                        <div>
+                            <h5 class="font-black text-amber-900 text-sm font-kids">Trik Kelompok 5 (Jempol & Teman):</h5>
+                            <p class="text-xs text-amber-800 mt-1 leading-relaxed">
+                                Angka 7 itu adalah <b>5 + 2</b>. Kalikan angka lawan dengan 5 dulu, lalu tambahkan dengan 2 kali angka lawan tersebut.
+                            </p>
+                            <p class="text-[11px] font-bold text-amber-900 mt-1">
+                                Contoh 7 × 6 = (5 × 6) + (2 × 6) = 30 + 12 = 42!
+                            </p>
+                        </div>
+                    </div>
+                `;
+            } else if (left === 8) {
+                trickEl.innerHTML = `
+                    <div class="flex items-start gap-2">
+                        <span class="text-2xl">🦁</span>
+                        <div>
+                            <h5 class="font-black text-amber-900 text-sm font-kids">Trik Selisih Sepuluh:</h5>
+                            <p class="text-xs text-amber-800 mt-1 leading-relaxed">
+                                Angka 8 adalah "kurang 2" dari 10. Maka untuk menghitung <b>8 × A</b>:
+                            </p>
+                            <p class="text-xs text-emerald-800 mt-1 bg-white px-2 py-1 rounded border border-amber-200">
+                                Hitung 10 kali angka itu (<b>A0</b>), lalu kurangi dengan dua kali lipat angka itu (<b>A + A</b>).
+                                <br><span class="text-[10px] font-bold text-amber-700">Contoh 8 × 7:</span> 70 - 14 = <b>56</b>!
+                            </p>
+                        </div>
+                    </div>
+                `;
+            } else if (left === 9) {
+                trickEl.innerHTML = `
+                    <div class="flex items-start gap-2">
+                        <span class="text-2xl">✋🤚</span>
+                        <div>
+                            <h5 class="font-black text-amber-900 text-sm font-kids">Trik Rahasia Jari Sembilan:</h5>
+                            <p class="text-xs text-amber-800 mt-1 leading-relaxed">
+                                Letakkan kedua tanganmu di depan dada. Jika perkaliannya adalah <b>9 × A</b>, lipatlah jari ke-A dari kiri!
+                            </p>
+                            <p class="text-xs text-amber-800 mt-1 font-bold">
+                                Jari sebelah kiri yang dilipat = PULUHAN.<br>
+                                Jari sebelah kanan yang dilipat = SATUAN.
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+
+        // ================= QUIZ ENGINE LOGIC =================
+        function initQuizSetup() {
+            // Reset setup selections
+            selectQuizTarget('easy');
+            selectSubFocus('none');
+            selectQuizMode('relaxed');
+        }
+
+        function selectQuizTarget(target) {
+            state.quiz.target = target;
+            state.quiz.subFocus = 'none'; // reset subfocus when target changes
+            
+            // Render target buttons
+            document.querySelectorAll('.qtarget-btn').forEach(btn => {
+                btn.className = "qtarget-btn py-4 rounded-2xl border-4 font-black text-lg transition flex flex-col items-center bg-white border-purple-100 text-purple-800 hover:border-purple-300";
+            });
+            const activeBtn = document.getElementById('qtarget-' + target);
+            if (activeBtn) {
+                activeBtn.className = "qtarget-btn py-4 rounded-2xl border-4 font-black text-lg transition flex flex-col items-center bg-purple-500 border-purple-600 text-white shadow-lg";
+            }
+
+            // Show/hide subfocus options based on target selection
+            const subContainer = document.getElementById('sub-focus-container');
+            const subBtns = document.querySelectorAll('.qsub-btn');
+            
+            // Reset sub buttons styles
+            subBtns.forEach(btn => {
+                btn.className = "qsub-btn py-2 text-sm font-bold bg-white border border-gray-200 text-gray-700 rounded-xl transition hover:bg-gray-50";
+            });
+
+            // Highlight subfocus buttons belonging to specific targets
+            subBtns.forEach(btn => {
+                const num = parseInt(btn.id.split('-')[1]);
+                if (target === 'easy' && num > 5) {
+                    btn.classList.add('opacity-40', 'pointer-events-none');
+                } else if (target === 'hard' && num < 6) {
+                    btn.classList.add('opacity-40', 'pointer-events-none');
+                } else {
+                    btn.classList.remove('opacity-40', 'pointer-events-none');
+                }
+            });
+
+            playBeep('click');
+        }
+
+        function selectSubFocus(val) {
+            if (state.quiz.subFocus === val) {
+                state.quiz.subFocus = 'none'; // toggle off
+            } else {
+                state.quiz.subFocus = val;
+            }
+
+            // Render subfocus buttons
+            document.querySelectorAll('.qsub-btn').forEach(btn => {
+                const numStr = btn.id.split('-')[1];
+                btn.className = "qsub-btn py-2 text-sm font-bold bg-white border border-gray-200 text-gray-700 rounded-xl transition hover:bg-gray-50";
+                
+                // Keep disabled ones disabled
+                const num = parseInt(numStr);
+                if (state.quiz.target === 'easy' && num > 5) {
+                    btn.classList.add('opacity-40', 'pointer-events-none');
+                } else if (state.quiz.target === 'hard' && num < 6) {
+                    btn.classList.add('opacity-40', 'pointer-events-none');
+                }
+            });
+
+            if (state.quiz.subFocus !== 'none') {
+                const activeBtn = document.getElementById('qsub-' + state.quiz.subFocus);
+                if (activeBtn) {
+                    activeBtn.className = "qsub-btn py-2 text-sm font-black bg-amber-400 border-2 border-amber-500 text-amber-950 rounded-xl transition scale-105 shadow-sm";
+                }
+            }
+            playBeep('click');
+        }
+
+        function selectQuizMode(mode) {
+            state.quiz.mode = mode;
+            document.querySelectorAll('.qmode-btn').forEach(btn => {
+                btn.className = "qmode-btn py-3 rounded-2xl border-2 font-bold transition flex flex-col items-center bg-white border-purple-100 text-purple-700 hover:border-purple-200";
+            });
+            const activeBtn = document.getElementById('qmode-' + mode);
+            if (activeBtn) {
+                activeBtn.className = "qmode-btn py-3 rounded-2xl border-2 font-bold transition flex flex-col items-center bg-purple-100 border-purple-500 text-purple-900 shadow-inner";
+            }
+            playBeep('click');
+        }
+
+        function generateQuizQuestions() {
+            const list = [];
+            let poolOfLeft = [];
+            
+            if (state.quiz.subFocus !== 'none') {
+                poolOfLeft = [parseInt(state.quiz.subFocus)];
+            } else {
+                if (state.quiz.target === 'easy') poolOfLeft = [2, 3, 4, 5];
+                else if (state.quiz.target === 'hard') poolOfLeft = [6, 7, 8, 9];
+                else poolOfLeft = [2, 3, 4, 5, 6, 7, 8, 9];
+            }
+
+            // Build 10 randomized multiplication items
+            for (let i = 0; i < 10; i++) {
+                const leftNum = poolOfLeft[Math.floor(Math.random() * poolOfLeft.length)];
+                
+                // Multipliers on the right are usually 2 to 9 (excluding simple ×1 or ×10)
+                const poolOfRight = [2, 3, 4, 5, 6, 7, 8, 9];
+                const rightNum = poolOfRight[Math.floor(Math.random() * poolOfRight.length)];
+                
+                list.push({
+                    left: leftNum,
+                    right: rightNum,
+                    answer: leftNum * rightNum
+                });
+            }
+            return list;
+        }
+
+        function startQuiz() {
+            state.quiz.questions = generateQuizQuestions();
+            state.quiz.currentIndex = 0;
+            state.quiz.streak = 0;
+            state.quiz.correctAnswers = 0;
+            state.quiz.usedHintInQuiz = false;
+
+            // Header UI title adaptation
+            let titleText = "Perkalian Campur";
+            if (state.quiz.subFocus !== 'none') {
+                titleText = `Fokus Perkalian ${state.quiz.subFocus}`;
+            } else {
+                if (state.quiz.target === 'easy') titleText = "Perkalian Dasar (2-5)";
+                else if (state.quiz.target === 'hard') titleText = "Perkalian Tantangan (6-9)";
+                else titleText = "Perkalian Jagoan (2-9)";
+            }
+            document.getElementById('quiz-play-title').textContent = titleText;
+
+            // Timer display
+            const timerContainer = document.getElementById('quiz-timer-container');
+            if (state.quiz.mode === 'relaxed') {
+                timerContainer.classList.add('hidden');
+            } else {
+                timerContainer.classList.remove('hidden');
+            }
+
+            goToScreen('quiz-play');
+            loadQuestion(0);
+        }
+
+        function loadQuestion(index) {
+            if (index >= 10) {
+                finishQuiz();
+                return;
+            }
+
+            // Unlock lion sticker upon starting any quiz
+            unlockSticker('st-lion');
+
+            state.quiz.currentIndex = index;
+            const q = state.quiz.questions[index];
+            
+            // Set Quiz Progress
+            document.getElementById('quiz-question-index').textContent = `${index + 1}/10`;
+            document.getElementById('quiz-q-left').textContent = q.left;
+            document.getElementById('quiz-q-right').textContent = q.right;
+
+            // Avatar Motivation text
+            const bubble = document.getElementById('quiz-avatar-bubble');
+            const sayings = [
+                `Ayo ${state.avatar.name}! Kamu pasti bisa! 🌟`,
+                "Jangan buru-buru, lihat polanya ya! 🔎",
+                "Ingat triknya atau buka Donat Bantuan! 🍩",
+                "Wah, angka ini seru banget dikalikan! 🎉",
+                "Kamu hebat, mari taklukkan angka ini! 💪"
+            ];
+            bubble.textContent = sayings[Math.floor(Math.random() * sayings.length)];
+
+            // Clear visual helper panel
+            resetQuizHint();
+
+            // Set up answer options
+            const correctAnswer = q.answer;
+            let options = [correctAnswer];
+            
+            // Generate plausible incorrect options
+            while (options.length < 4) {
+                // Add or subtract close multiples, or off by a few
+                const variants = [
+                    correctAnswer + q.left,
+                    correctAnswer - q.left,
+                    correctAnswer + q.right,
+                    correctAnswer - q.right,
+                    correctAnswer + 10,
+                    correctAnswer - 10,
+                    (q.left - 1) * q.right,
+                    (q.left + 1) * q.right,
+                    Math.max(4, correctAnswer + (Math.random() > 0.5 ? 2 : -2)),
+                    Math.max(4, correctAnswer + (Math.random() > 0.5 ? 4 : -4))
+                ].filter(val => val > 0 && val !== correctAnswer && !options.includes(val));
+
+                if (variants.length > 0) {
+                    const chosen = variants[Math.floor(Math.random() * variants.length)];
+                    options.push(chosen);
+                } else {
+                    options.push(correctAnswer + options.length * 3);
+                }
+            }
+
+            // Shuffle options
+            options.sort(() => Math.random() - 0.5);
+            state.quiz.currentCorrectChoice = options.indexOf(correctAnswer);
+
+            // Bind options to buttons
+            for (let i = 0; i < 4; i++) {
+                const btn = document.getElementById(`choice-${i}`);
+                btn.textContent = options[i];
+                // Reset button style
+                btn.className = "choice-btn py-4 px-2 bg-purple-50 hover:bg-purple-100 border-2 border-purple-300 rounded-2xl font-black text-2xl text-purple-800 transition bounce-active";
+                btn.disabled = false;
+            }
+
+            // Start timer if applicable
+            if (state.quiz.mode === 'timed') {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            if (state.quiz.timerInterval) clearInterval(state.quiz.timerInterval);
+            
+            state.quiz.timer = 15;
+            const timerText = document.getElementById('quiz-timer-text');
+            timerText.textContent = `${state.quiz.timer}s`;
+            timerText.parentElement.className = "flex items-center space-x-2 bg-rose-100 px-3 py-1.5 rounded-full border border-rose-300";
+
+            state.quiz.timerInterval = setInterval(() => {
+                state.quiz.timer--;
+                timerText.textContent = `${state.quiz.timer}s`;
+
+                // Alert color transition at low time
+                if (state.quiz.timer <= 5) {
+                    timerText.parentElement.className = "flex items-center space-x-2 bg-rose-500 text-white px-3 py-1.5 rounded-full border border-rose-700 animate-pulse";
+                }
+
+                if (state.quiz.timer <= 0) {
+                    clearInterval(state.quiz.timerInterval);
+                    handleTimeOut();
+                }
+            }, 1000);
+        }
+
+        function handleTimeOut() {
+            playBeep('wrong');
+            state.quiz.streak = 0;
+            document.getElementById('quiz-streak-text').textContent = "0";
+
+            // Highlight the correct answer
+            for (let i = 0; i < 4; i++) {
+                const btn = document.getElementById(`choice-${i}`);
+                btn.disabled = true;
+                if (i === state.quiz.currentCorrectChoice) {
+                    btn.className = "choice-btn py-4 px-2 bg-emerald-500 border-4 border-emerald-700 text-white rounded-2xl font-black text-2xl";
+                } else {
+                    btn.className = "choice-btn py-4 px-2 bg-gray-100 border-2 border-gray-300 text-gray-400 rounded-2xl font-black text-2xl";
+                }
+            }
+
+            // Next question
+            setTimeout(() => {
+                loadQuestion(state.quiz.currentIndex + 1);
+            }, 2200);
+        }
+
+        function showQuizHint() {
+            state.quiz.usedHintInQuiz = true;
+            unlockSticker('st-owl'); // Unlock owl for using visual help
+
+            const q = state.quiz.questions[state.quiz.currentIndex];
+            
+            const promptEl = document.getElementById('quiz-hint-prompt');
+            const contentEl = document.getElementById('quiz-hint-content');
+            const gridEl = document.getElementById('quiz-hint-grid');
+            const textEl = document.getElementById('quiz-hint-text');
+
+            promptEl.classList.add('hidden');
+            contentEl.classList.remove('hidden');
+
+            // Setup breakdown hints based on left multiplier
+            if (q.left > 5) {
+                textEl.innerHTML = `Ingat: ${q.left} × ${q.right} = (5 × ${q.right}) + (${q.left - 5} × ${q.right})`;
+            } else if (q.left === 4) {
+                textEl.innerHTML = `Ingat Double-Double: 4 × ${q.right} = double dari (${q.right} + ${q.right})`;
+            } else if (q.left === 2) {
+                textEl.innerHTML = `Kembar Dua: ${q.right} + ${q.right}`;
+            } else {
+                textEl.innerHTML = `Tambahkan ${q.left} sebanyak ${q.right} kali!`;
+            }
+
+            // Construct visual helper grid in miniature
+            gridEl.innerHTML = '';
+            gridEl.style.gridTemplateColumns = `repeat(${q.right}, minmax(0, 1fr))`;
+            
+            for (let r = 0; r < q.left; r++) {
+                for (let c = 0; c < q.right; c++) {
+                    const dot = document.createElement('div');
+                    
+                    let emoji = "🍩";
+                    let bg = "bg-amber-300";
+                    if (q.left > 5 && r >= 5) {
+                        emoji = "🍪";
+                        bg = "bg-orange-300";
+                    } else if (q.left === 4 && r >= 2) {
+                        emoji = "🧁";
+                        bg = "bg-sky-300";
+                    }
+
+                    dot.className = `w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${bg}`;
+                    dot.textContent = emoji;
+                    gridEl.appendChild(dot);
+                }
+            }
+            playBeep('click');
+        }
+
+        function resetQuizHint() {
+            document.getElementById('quiz-hint-prompt').classList.remove('hidden');
+            document.getElementById('quiz-hint-content').classList.add('hidden');
+        }
+
+        function revealSecretTrick() {
+            const q = state.quiz.questions[state.quiz.currentIndex];
+            let trickText = "";
+            
+            if (q.left === 2) {
+                trickText = `🔑 Double It! Cukup hitung penjumlahan kembar: ${q.right} + ${q.right} = ${q.answer}`;
+            } else if (q.left === 3) {
+                trickText = `🔑 Ritme Kelipatan 3: Lompat tiga angka sebanyak ${q.right} kali. Hasilnya ${q.answer}`;
+            } else if (q.left === 4) {
+                trickText = `🔑 Trik Double-Double: Double dari ${q.right} adalah ${q.right * 2}. Double dari ${q.right * 2} adalah ${q.answer}!`;
+            } else if (q.left === 5) {
+                trickText = `🔑 Trik Angka 5: Selalu berakhiran 5 atau 0. Karena ${q.right} adalah genap/ganjil, hasilnya ${q.answer}!`;
+            } else if (q.left === 9) {
+                trickText = `🔑 Trik Jari: Jari dilipat ke-${q.right}: Ada ${q.right - 1} di kiri dan ${10 - q.right} di kanan. Hasilnya ${q.answer}!`;
+            } else if (q.left === 8) {
+                trickText = `🔑 Trik 10x: ${q.right}0 dikurangi ${q.right * 2} = ${q.answer}`;
+            } else {
+                trickText = `🔑 Trik Jembatan 5: (5 × ${q.right}) + (${q.left - 5} × ${q.right}) = ${5*q.right} + ${(q.left - 5)*q.right} = ${q.answer}`;
+            }
+
+            const textEl = document.getElementById('quiz-hint-text');
+            const contentEl = document.getElementById('quiz-hint-content');
+            const promptEl = document.getElementById('quiz-hint-prompt');
+            
+            promptEl.classList.add('hidden');
+            contentEl.classList.remove('hidden');
+            textEl.innerHTML = `<span class="bg-yellow-200 text-yellow-950 p-1.5 rounded block font-bold leading-relaxed text-xs">${trickText}</span>`;
+            playBeep('click');
+        }
+
+        function submitAnswer(choiceIndex) {
+            if (state.quiz.mode === 'timed' && state.quiz.timerInterval) {
+                clearInterval(state.quiz.timerInterval);
+            }
+
+            const isCorrect = (choiceIndex === state.quiz.currentCorrectChoice);
+            
+            // Disable all choices
+            for (let i = 0; i < 4; i++) {
+                document.getElementById(`choice-${i}`).disabled = true;
+            }
+
+            const chosenBtn = document.getElementById(`choice-${choiceIndex}`);
+
+            if (isCorrect) {
+                playBeep('correct');
+                state.quiz.correctAnswers++;
+                state.quiz.streak++;
+                
+                // Add star bonus immediately
+                state.stars += 2;
+                saveGameData();
+
+                // Style choice button green
+                chosenBtn.className = "choice-btn py-4 px-2 bg-emerald-500 border-4 border-emerald-700 text-white rounded-2xl font-black text-2xl scale-105 transition duration-150";
+            } else {
+                playBeep('wrong');
+                state.quiz.streak = 0;
+
+                // Style chosen red, correct green
+                chosenBtn.className = "choice-btn py-4 px-2 bg-rose-500 border-4 border-rose-700 text-white rounded-2xl font-black text-2xl transition duration-150";
+                const correctBtn = document.getElementById(`choice-${state.quiz.currentCorrectChoice}`);
+                correctBtn.className = "choice-btn py-4 px-2 bg-emerald-500 border-4 border-emerald-700 text-white rounded-2xl font-black text-2xl transition duration-150";
+            }
+
+            // Update streak counter visually
+            document.getElementById('quiz-streak-text').textContent = state.quiz.streak;
+
+            // Wait and progress
+            setTimeout(() => {
+                loadQuestion(state.quiz.currentIndex + 1);
+            }, 1800);
+        }
+
+        function finishQuiz() {
+            if (state.quiz.timerInterval) clearInterval(state.quiz.timerInterval);
+            playBeep('congrats');
+
+            // Calculate total points earned
+            const correctCount = state.quiz.correctAnswers;
+            const scoreMultiplier = state.quiz.mode === 'timed' ? 10 : 5;
+            const starsEarned = correctCount * scoreMultiplier;
+            state.stars += starsEarned;
+            
+            // Customize Headline based on score
+            const headlineEl = document.getElementById('congrats-headline');
+            const subEl = document.getElementById('congrats-sub');
+            if (correctCount === 10) {
+                headlineEl.textContent = "Luar Biasa Sempurna! 👑";
+                subEl.textContent = "Kamu adalah Raja/Ratu Perkalian sejati! Semua jawaban betul!";
+            } else if (correctCount >= 7) {
+                headlineEl.textContent = "Hebat Sekali! 🎉";
+                subEl.textContent = "Kamu pintar sekali, pertahankan terus kerja bagusmu!";
+            } else {
+                headlineEl.textContent = "Bagus, Tetap Semangat! 👍";
+                subEl.textContent = "Terus latihan ya, sedikit lagi kamu pasti hafal semuanya!";
+            }
+
+            // Check & Unlock achievements/stickers
+            let newlyUnlockedSticker = null;
+
+            // 1. Fox: Perfect score
+            if (correctCount === 10) {
+                const s = unlockSticker('st-fox');
+                if (s) newlyUnlockedSticker = s;
+            }
+            // 2. Koala: Selesaikan mode santai
+            if (state.quiz.mode === 'relaxed') {
+                const s = unlockSticker('st-koala');
+                if (s) newlyUnlockedSticker = s;
+            }
+            // 3. Cheetah: Selesaikan mode waktu
+            if (state.quiz.mode === 'timed') {
+                const s = unlockSticker('st-cheetah');
+                if (s) newlyUnlockedSticker = s;
+            }
+            // 4. 🌱 Sprout: Selesaikan Kuis Dasar (2-5)
+            if (state.quiz.target === 'easy' || (state.quiz.subFocus !== 'none' && parseInt(state.quiz.subFocus) <= 5)) {
+                const s = unlockSticker('st-sprout');
+                if (s) newlyUnlockedSticker = s;
+            }
+            // 5. Dino: Selesaikan Kuis Tantangan Perkalian 6-7
+            if (state.quiz.target === 'hard' || state.quiz.subFocus === '6' || state.quiz.subFocus === '7') {
+                const s = unlockSticker('st-dragon');
+                if (s) newlyUnlockedSticker = s;
+            }
+            // 6. Unicorn: Selesaikan Kuis Tantangan Perkalian 8-9
+            if (state.quiz.subFocus === '8' || state.quiz.subFocus === '9') {
+                const s = unlockSticker('st-unicorn');
+                if (s) newlyUnlockedSticker = s;
+            }
+
+            // Save state
+            saveGameData();
+
+            // Populate Congrats Screen
+            document.getElementById('congrats-correct').textContent = `${correctCount} / 10`;
+            document.getElementById('congrats-stars').textContent = `+${starsEarned} ⭐`;
+
+            // Display newly unlocked sticker or random congrats message
+            const stickerPromoEl = document.getElementById('congrats-sticker-reward');
+            if (newlyUnlockedSticker) {
+                stickerPromoEl.classList.remove('hidden');
+                document.getElementById('rewarded-sticker-emoji').textContent = newlyUnlockedSticker.emoji;
+                document.getElementById('rewarded-sticker-name').textContent = newlyUnlockedSticker.name;
+            } else {
+                // If nothing new unlocked, show a generic unlocked one
+                const unlockedList = ALL_STICKERS.filter(s => s.unlocked);
+                if (unlockedList.length > 0) {
+                    const randomUnlocked = unlockedList[Math.floor(Math.random() * unlockedList.length)];
+                    stickerPromoEl.classList.remove('hidden');
+                    document.getElementById('rewarded-sticker-emoji').textContent = randomUnlocked.emoji;
+                    document.getElementById('rewarded-sticker-name').textContent = `Koleksi Hebatmu: ${randomUnlocked.name}`;
+                } else {
+                    stickerPromoEl.classList.add('hidden');
+                }
+            }
+
+            goToScreen('congrats');
+            triggerConfetti();
+        }
+
+        // --- CELEBRATION CONFETTI ENGINE ---
+        function triggerConfetti() {
+            const canvas = document.getElementById("confetti-canvas");
+            const ctx = canvas.getContext("2d");
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let confettiElements = [];
+            const colors = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899"];
+
+            for (let i = 0; i < 150; i++) {
+                confettiElements.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    r: Math.random() * 6 + 4,
+                    d: Math.random() * canvas.height,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    tilt: Math.random() * 10 - 5,
+                    tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+                    tiltAngle: 0
+                });
+            }
+
+            let animationFrameId;
+            function drawConfetti() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let active = false;
+
+                confettiElements.forEach((p, idx) => {
+                    p.tiltAngle += p.tiltAngleIncremental;
+                    p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+                    p.tilt = Math.sin(p.tiltAngle - idx / 3) * 15;
+
+                    if (p.y <= canvas.height) {
+                        active = true;
+                    }
+
+                    ctx.beginPath();
+                    ctx.lineWidth = p.r;
+                    ctx.strokeStyle = p.color;
+                    ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                    ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                    ctx.stroke();
+                });
+
+                if (active) {
+                    animationFrameId = requestAnimationFrame(drawConfetti);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+
+            drawConfetti();
+
+            // Clear after 4 seconds
+            setTimeout(() => {
+                cancelAnimationFrame(animationFrameId);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }, 4500);
+        }
+
+        // --- WINDOW LOAD & INITIALIZATION ---
+        window.onload = function() {
+            // Load user data or set defaults
+            loadSaveData();
+            
+            // Render basic UI items
+            document.getElementById('global-stars').textContent = state.stars;
+            
+            // Detect pre-selected avatar or default to Koko
+            const savedAvatar = localStorage.getItem('perkalian_jagoan_avatar');
+            if (savedAvatar) {
+                try {
+                    const parsed = JSON.parse(savedAvatar);
+                    selectAvatar(parsed.emoji, parsed.name);
+                } catch(e) {
+                    selectAvatar('🐱', 'Koko');
+                }
+            } else {
+                selectAvatar('🐱', 'Koko');
+            }
+
+            // Always render current screen
+            goToScreen('home');
+        };
+
+        // Resize handler for canvas
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById("confetti-canvas");
+            if (canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        });
+    </script>
+</body>
+</html>
